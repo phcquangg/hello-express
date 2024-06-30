@@ -6,7 +6,7 @@ const os = require('node:os');
 const TIME_INTERVAL = 5000
 
 const countConnects = () => {
-  console.log('Currently have ' + mongoose.connections.length + ' connection(s)');
+  // console.log('Currently have ' + mongoose.connections.length + ' connection(s)');
   return mongoose.connections.length;
 }
 
