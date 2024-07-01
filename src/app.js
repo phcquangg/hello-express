@@ -8,15 +8,16 @@ require('dotenv').config({
 });
 
 const app = express();
+const demo_route = require('./routes');
+const bodyParser = require('body-parser');
 
 app.use(morgan('dev'));
 app.use(helmet());
 app.use(compression());
+app.use(bodyParser.json());
 
-require('./databases/init.mongodb')
+require('./databases/init.mongodb');
 
-app.get('/', (res, req, next) => {
-  next();
-})
+app.use('/', demo_route)
 
 module.exports = app;
