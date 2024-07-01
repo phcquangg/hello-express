@@ -1,9 +1,11 @@
 "use strict";
 
 const bcrypt = require("bcrypt");
-const crypto = require("crypto");
+const crypto = require("node:crypto");
 const shopModel = require("../../models/shop.model");
 const { getInfoData } = require("../../utils");
+const KeyTokenService = require("../keytoken.service");
+const { createPairToken } = require("../../utils/auth");
 
 const SHOP_ROLES = {
   SHOP: "SHOP",
@@ -32,43 +34,43 @@ class AccessService {
         password: hashedPwd,
         roles: [SHOP_ROLES.SHOP],
       });
-      console.log('-------------------- HEREs', newShop)
 
       // create access token
       if (newShop) {
         // private key  -> send to user     | sign token
         // public key   -> save in our side | verify token
-        const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
-          modulusLength: 4096,
-          publicKeyEncoding: {
-            type: 'pkcs1',
-            format: 'pen'
-          },
-          privateKeyEncoding: {
-            type: 'pkcs1',
-            format: 'pen'
-          }
-        });
+        // const { privateKey, publicKey } = crypto.generateKeyPairSync("rsa", {
+        //   modulusLength: 4096,
+        //   publicKeyEncoding: {
+        //     type: 'pkcs1',
+        //     format: 'pen'
+        //   },
+        //   privateKeyEncoding: {
+        //     type: 'pkcs1',
+        //     format: 'pen'
+        //   }
+        // });
 
-        console.log({ privateKey, publicKey })
-        const publicKeyString = await KeyTokenService.createKeyToken({
+        const privateKey = crypto.randomBytes(64).toString('hex');
+        const publicKey = crypto.randomBytes(64).toString('hex');
+      
+        const keys = await KeyTokenService.createKeyToken({
           userId: newShop._id,
-          publicKey
+          publicKey,
+          privateKey
         });
 
-        if (!publicKeyString) {
+        if (!keys) {
           return {
             code: '[error_code]',
-            message: 'publicKeyString error'
+            message: 'keys error'
           }
         }
 
-        const publicKeyObject = crypto.createPublicKey(publicKeyString);
-
-        const tokens = await createTokenPair({
+        const tokens = await createPairToken({
           userId: newShop._id,
           email
-        }, publicKeyString, privateKey)
+        }, publicKey, privateKey)
 
         console.log('Tokens are created::', tokens);
 

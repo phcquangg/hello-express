@@ -1,22 +1,32 @@
-"use strict";
+const { Schema, model } = require("mongoose");
 
-const keyTokenModel = require("../models/keytoken.model");
+const DOCUMENT_NAME = "Key";
+const COLLECTION_NAME = "Keys";
 
-class KeyTokenService {
-  static createKeyToken = async ({ userId, publicKey }) => {
-    try {
-      const publicKeyString = publicKey.toString();
-      const tokens = await keyTokenModel.create({
-        userId,
-        publicKey: publicKeyString,
-      });
+var keyTokenSchema = new Schema(
+  {
+    user_id: {
+      type: Schema.Types.ObjectId,
+      require: true,
+      ref: "Shop",
+    },
+    privateKey: {
+      type: String,
+      require: true,
+    },
+    publicKey: {
+      type: String,
+      require: true,
+    },
+    refreshToken: {
+      type: Array,
+      default: [],
+    },
+  },
+  {
+    collection: COLLECTION_NAME,
+    timestamps: true,
+  }
+);
 
-      return tokens.publicKey || "";
-    } catch (error) {
-      return error;
-    }
-  };
-}
-
-module.exports = KeyTokenService;
-
+module.exports = model(DOCUMENT_NAME, keyTokenSchema);
